@@ -162,9 +162,9 @@ async function main(){
               weekendsFound = true;
             }
 
-            if(!foundVariations.includes(directionName + " Route " + routeNumber + " " + routeLetterDestination)){
+            if(!foundVariations.includes(directionName.replace(/\s/g,'') + " Route " + routeNumber.replace(/\s/g,'') + " " + routeLetterDestination.replace(/\s/g,'') + " " + shape_id.toString().substring(0, shape_id.toString().indexOf('_Tim')))){
 
-              foundVariations.push(directionName + " Route " + routeNumber + " " + routeLetterDestination);
+              foundVariations.push(directionName.replace(/\s/g,'') + " Route " + routeNumber.replace(/\s/g,'') + " " + routeLetterDestination.replace(/\s/g,'') + " " + shape_id.toString().substring(0, shape_id.toString().indexOf('_Tim')));
 
               var bRoute = document.createElement("div");
               bRoute.classList.add("accordion-item");
@@ -191,12 +191,31 @@ async function main(){
               bcButton.setAttribute("data-bs-target", "#flush-collapse-inner" + index.toString() + tripIndex.toString());
               bcButton.setAttribute("aria-expanded", "false");
               bcButton.setAttribute("aria-controls", "flush-collapse-inner" + index.toString() + tripIndex.toString());
-              bcButton.innerHTML = directionName + " Route " + routeNumber + " " + routeLetterDestination;
+              //bcButton.innerHTML = directionName + " Route " + routeNumber + " " + routeLetterDestination;
               bcButton.id = "bcButtonRoute" + index.toString() + tripIndex.toString();
+
+              var table = document.createElement("table");
+              bcButton.appendChild(table);
+
+              var firstRow = document.createElement("tr");
+              table.appendChild(firstRow);
+
+              var headline = document.createElement("td");
+              headline.innerHTML = directionName + " Route " + routeNumber + " " + routeLetterDestination;
+              firstRow.appendChild(headline);
+
+              var secondRow = document.createElement("tr");
+              table.appendChild(secondRow);
+
+              var firstStop = document.createElement("td");
+              firstStop.innerHTML = "First Stop: Not Found";
+              firstStop.id = "FirstStop" + index.toString() + tripIndex.toString();
+              secondRow.appendChild(firstStop);
 
               bheading.appendChild(bcButton);
 
-        // #2 Children
+
+              // #2 Children
 
 
               var theList = document.createElement("ol");
@@ -205,15 +224,17 @@ async function main(){
               // Before making sub-route (inner) visible, lets find all the stops for the sub-route
               let stopIndex = 0;
               let equalTripIDs = false;
-              let starterTime = ""
+              let starterTime = "";
+              let firstStopID = 0;
 
               for (const sto of stopTimeRows) {
                 stopIndex++;
-                const [sTripID, sArrivalTime , sDepartTime, sStopID, sStopSequence, sStopHeadsign, sPickupType, sDropOff, sShapeDistTravel, sTimePoint] = sto.split(',')
+                const [sTripID, sArrivalTime , sDepartTime, sStopID, sStopSequence, sStopHeadsign, sPickupType, sDropOff, sShapeDistTravel, sTimePoint] = sto.split(',');
 
               if(tripID == sTripID){
                 if(equalTripIDs == false){
-                  starterTime = sDepartTime
+                  starterTime = sDepartTime;
+                  firstStopID = sStopID;
                 }
                 equalTripIDs = true;
 
@@ -223,23 +244,28 @@ async function main(){
                 
                 var stopShift = document.createElement("div");
                 stopShift.classList.add("ms-2",  "me-auto");
-                stopGroup.appendChild(stopShift)
+                stopGroup.appendChild(stopShift);
 
                 var stopHeading = document.createElement("div");
                 stopHeading.textContent = "Stop Name Not Found!";
-                stopShift.appendChild(stopHeading)
+                stopShift.appendChild(stopHeading);
+
 
                 for (const bst of busStopRows) {
                   const [b_lat, b_wheelchair , b_stopCode, b_stop_lon, b_stop_timezone, b_stop_url, b_parent_station, b_stop_desc, b_stop_name, b_locationtype, b_stopID, b_zoneID] = bst.split(',')
                   if(sStopID == b_stopID){
                     stopHeading.innerHTML = b_stop_name;
 
+                    if(b_stopID == firstStopID){
+                      firstStop.innerHTML = "Starts at " + b_stop_name;
+                    }
+
                     if(b_wheelchair == 1){
                         var badge = document.createElement("span");
                         badge.classList.add("badge", "bg-success");
-                        badge.innerHTML = "Accessible"
+                        badge.innerHTML = "Accessible";
                         badge.id = "Badge_AC_" + index.toString() + tripIndex.toString() + stopIndex.toString();
-                        stopHeading.appendChild(badge)
+                        stopHeading.appendChild(badge);
                     }
 
                     break;
@@ -249,8 +275,8 @@ async function main(){
 
 
                 var subTextOvernight = document.createElement("li"); // Time Elapsed Text Section
-                subTextOvernight.innerHTML = "Time Elapsed: " + getTimeElapsed(starterTime, sDepartTime)
-                subTextOvernight.id = "subText" + sStopID + "-" + routeNumber + "-" + routeLetterDestination + "TimeElapsed"
+                subTextOvernight.innerHTML = "Time Elapsed: " + getTimeElapsed(starterTime, sDepartTime);
+                subTextOvernight.id = "subText" + sStopID + "-" + routeNumber + "-" + routeLetterDestination + "TimeElapsed";
                 stopHeading.appendChild(subTextOvernight);
 
                 theList.appendChild(stopGroup);
@@ -286,17 +312,17 @@ async function main(){
         if((!weekdaysFound) && foundVariations.length != 0){ // In the event a bus does not run on weekdays, we will give a warning message
           var badge = document.createElement("span");
           badge.classList.add("badge", "bg-success");
-          badge.innerHTML = "NO Weekday Service"
+          badge.innerHTML = "NO Weekday Service";
           badge.id = "Badge_SERVICEWeekdays_" + index.toString() + tripIndex.toString();
-          acButton.appendChild(badge)
+          acButton.appendChild(badge);
         }
 
         if(weekendsFound){
         var badge = document.createElement("span");
         badge.classList.add("badge", "bg-secondary");
-        badge.innerHTML = "Weekends"
+        badge.innerHTML = "Weekends";
         badge.id = "Badge_SERVICEWeekends_" + index.toString() + tripIndex.toString();
-        acButton.appendChild(badge)
+        acButton.appendChild(badge);
         }
 
 
