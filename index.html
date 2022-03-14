@@ -1,0 +1,145 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Transit Info</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-1BmE4kWBq78iYhFldvKuhfTAU6auU8tT94WrHftjDbrCEXSU1oBoqyl2QvZ6jIW3" crossorigin="anonymous">
+    <link rel="stylesheet" href="styles/transit.css" type="text/css"/>
+
+
+</head>
+
+
+<svg xmlns="http://www.w3.org/2000/svg" style="display: none;">
+  <symbol id="exclamation-triangle-fill" fill="currentColor" viewBox="0 0 16 16">
+    <path d="M8.982 1.566a1.13 1.13 0 0 0-1.96 0L.165 13.233c-.457.778.091 1.767.98 1.767h13.713c.889 0 1.438-.99.98-1.767L8.982 1.566zM8 5c.535 0 .954.462.9.995l-.35 3.507a.552.552 0 0 1-1.1 0L7.1 5.995A.905.905 0 0 1 8 5zm.002 6a1 1 0 1 1 0 2 1 1 0 0 1 0-2z"/>
+  </symbol>
+</svg>
+
+
+<nav class="navbar navbar-expand-lg navbar-dark bg-dark">
+    <div class="container-fluid">
+      <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav" aria-controls="navbarNav" aria-expanded="false" aria-label="Toggle navigation">
+        <span class="navbar-toggler-icon"></span>
+      </button>
+      <div class="collapse navbar-collapse" id="navbarNav">
+        <ul class="navbar-nav">
+          <li class="nav-item">
+            <a class="nav-link active" aria-current="page" href="../index.html">About Me</a>
+          </li>
+          <li class="nav-item">
+            <a class="nav-link" href="projects.html">Projects</a>
+          </li>
+          <li class="nav-item">
+            <a class="nav-link" href="contact.html">Contact</a>
+          </li>
+        </ul>
+      </div>
+    </div>
+  </nav>
+
+
+
+<body>
+
+  <div class="transitproject">
+    <div class="row" id="row">
+      <div class="col"><h2>Transit Info</h2></div>
+      <a class="col" id="returnproj" href="../html/projects.html">Back to Projects</a>
+    </div>
+  
+      <h3>About and Important Information</h3>
+      <p>This project uses data from Durham Region Transit (DRT) to dynamically load in bus routes, sub-routes(a,b,c), and all the stops located within each sub-route. If any changes occur to the DRT service, this website can be updated simply by uploading the new data via txt files. <b>DISCLAIMER:</b> The data on this website
+        may not be up-to-date or complete, use the <a href="https://www.durhamregiontransit.com/" id="linkDRT">Durham Region Transit</a> website instead for more accurate information.
+      </p>
+
+      <h3>GitHub Link</h3>
+      <p><a id="linkGitHubTransit" href="https://github.com/adadamc/transitinfo">https://github.com/adadamc/transitinfo</a></p>
+      
+
+      <h3>Legend</h3>
+
+      <table id="projecttable">
+        <tr>
+            <th><span class="badge bg-danger">Temporary Suspension</span></th>
+            <th>Route is temporarily suspended</th>
+        </tr>
+        <tr>
+            <th><span class="badge bg-success">Accessible</span></th>
+            <th>Wheelchair accessible bus stop</th>
+        </tr>
+        <tr>
+            <th><span class="badge bg-primary">Blue Night</span></th>
+            <th>Service operates overnight</th>
+        </tr>
+        <tr>
+          <th><span class="badge bg-secondary">Weekends</span></th>
+          <th>Service operates on weekends</th>
+      </tr>
+        <tr>
+            <th><span class="badge bg-warning text-dark">PULSE</span></th>
+            <th>Bus Rapid Transit</th>
+        </tr>
+      </table>
+      
+      <br>
+
+
+      <h3>Routes</h3>
+
+      <h5 id="loadingnotice">Please allow around 5-15 seconds for data to load.</h5>
+
+      <div class="d-flex justify-content-center" id="loadingspinner">
+        <div class="spinner-border" role="status">
+          <span class="visually-hidden">Loading...</span>
+        </div>
+      </div>
+
+      <div class="accordion accordion-flush" id="routeacc">
+        <!-- Dynamically loaded in busproject.js -->
+      </div>
+
+
+    <br>
+
+      <h3>Project Updates</h3>
+
+      <div class="accordion" id="accordionExampleBus" id="accr">
+
+
+        <div class="accordion-item" id="accr">
+          <h2 class="accordion-header" id="headingOne">
+            <button class="accordion-button" type="button" data-bs-toggle="collapse" data-bs-target="#collapseOne" aria-expanded="true" aria-controls="collapseOne" id="acr2">
+              March 13, 2022 (V1)
+            </button>
+          </h2>
+          <div id="collapseOne" class="accordion-collapse collapse show" aria-labelledby="headingOne" data-bs-parent="#accordionExampleBus">
+            <div class="accordion-body">
+              <ul>
+                <li>Currently all code is client sided using JavaScript.</li>
+                <li>The routes section (and all the data contained with each route) will automatically update upon new files being uploaded.</li>
+                <li>Current information available: Routes, Route Description (Suspended, Blue Night, PULSE, Weekends), Sub-routes (a,b,c), all the stops contained in a sub-route and if they are
+                  wheel chair accessible and the duration between the first stop and that stop.
+                </li>
+                <li>As of now all routes operate on weekdays (excluding suspended ones), in the event a new route is added that does not run on weekdays, a message will appear informing the user.</li>
+            </ul>
+            </div>
+          </div>
+        </div>
+
+
+    </div>
+
+    <Br>
+
+      <h3>Credits and Data Info</h3>
+      <p>Contains public sector information made available under The Regional Municipality of Durham's Open Data Licence</p>
+      <p>Data was downloaded from the "GTFS Static Schedule" dataset</p>
+      <p>The dataset was manually downloaded and this website currently uses the dataset from March 11, 2022</p>
+  </div>
+  <script src="scripts/busproject.js" type="module"></script>
+  <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/js/bootstrap.bundle.min.js" integrity="sha384-ka7Sk0Gln4gmtz2MlQnikT1wXgYsOg+OMhuP+IlRH9sENBO0LRn5q+8nbTov4+1p" crossorigin="anonymous"></script>
+</body>
+</html>

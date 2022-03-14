@@ -1,0 +1,161 @@
+.main{
+    margin-left: 17px;
+    margin-right: 17px;
+    font-size: 22px;
+    color: white;
+    font-family: Arial, Helvetica, sans-serif;
+}
+
+body{
+    font-family: Arial, Helvetica, sans-serif;
+}
+
+.accordion-body{
+    font-size: 17px;
+    padding-bottom: 0px;
+}
+
+.accordion-button:after{
+    background-image: url("data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 16 16' fill='%23ffffff'><path fill-rule='evenodd' d='M1.646 4.646a.5.5 0 0 1 .708 0L8 10.293l5.646-5.647a.5.5 0 0 1 .708.708l-6 6a.5.5 0 0 1-.708 0l-6-6a.5.5 0 0 1 0-.708z'/></svg>") !important;
+}
+
+h2{
+    margin: 10px 0px;
+    font-family: Arial, Helvetica, sans-serif;
+}
+
+[id^=accr] h2{
+    margin: 0px 0px;
+    font-family: Arial, Helvetica, sans-serif;
+}
+
+/* id starts with accr*/
+[id^=accr]{
+    background-color: #202020;
+    width: 100%;
+}
+
+[id^=Badge_]{
+    margin-left: 1vw;
+}
+
+[id^=acButtonRoute]{
+    background-color: #202020;
+    color: white;
+}
+
+[id^=acButtonRoute]:hover{
+    background-color: #292929;
+    color: white;
+}
+
+[id^=acButtonRoute]:not(.collapsed){
+    background-color: #202020;
+    color: white;
+}
+
+[id^=acButtonRoute]:focus{
+    background-color: #292929 !important;
+    outline: 0 !important;
+    border-radius: 0px !important;
+    color: white;
+}
+
+
+[id^=bcButtonRoute]{
+    background-color: #333333;
+    color: white;
+    padding-left: 5vw;
+}
+
+[id^=bcButtonRoute]:hover{
+    background-color: #292929;
+    color: white;
+}
+
+[id^=bcButtonRoute]:not(.collapsed){
+    background-color: #333333;
+    color: white;
+}
+
+[id^=bcButtonRoute]:focus{
+    background-color: #292929 !important;
+    outline: 0 !important;
+    border-radius: 0px !important;
+    color: white;
+}
+
+[id^=busStopInnerList]{
+    background-color: #444444;
+    color: white;
+    font-family: Arial, Helvetica, sans-serif;
+    font-size: 17px;
+}
+
+[id^=stopGroup]{
+    background-color: #444444;
+    color: white;
+    font-family: Arial, Helvetica, sans-serif;
+    font-size: 17px;
+}
+
+[id^=subText]{
+    background-color: #444444;
+    color: rgb(219, 219, 219);
+    font-family: Arial, Helvetica, sans-serif;
+    font-size: 13px;
+}
+
+
+#acr2{
+    background-color: #353535;
+    color: white;
+}
+
+#row{
+    width: 100%;
+}
+
+#returnproj{
+    font-family: Arial, Helvetica, sans-serif;
+    margin: 10px 0px;
+    text-decoration: underline;
+    text-align: right;
+}
+
+#returnproj:hover{
+    color: rgb(198, 228, 255);
+}
+
+
+.transitproject{
+    margin-left: 17px;
+    margin-right: 17px;
+    font-size: 22px;
+    color: white;
+    font-family: Arial, Helvetica, sans-serif;
+}
+
+.transitproject a{
+    color: white;
+    font-family: Arial, Helvetica, sans-serif;
+    text-decoration: none;
+}
+
+[id^=link]:hover{
+    color: rgb(198, 228, 255);
+}
+
+[id^=link]{
+    text-decoration: underline;
+    color: white;
+}
+
+#projecttable, #projecttable th{
+    border: 1px solid;
+    padding: 4px;
+}
+
+body{
+    background-color: black;
+}
