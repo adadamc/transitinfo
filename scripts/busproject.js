@@ -1,3 +1,5 @@
+var list = document.getElementById("routeacc")
+
 let routeData = ""
 let tripData = ""
 let stopTimeData = ""
@@ -28,6 +30,7 @@ async function getStops(){
 }
 
 function getTimeElapsed(startingTime, endingTime){
+
   const stTime = startingTime.trim().split(":");
   const enTime = endingTime.trim().split(":");
 
@@ -61,7 +64,6 @@ function getTimeElapsed(startingTime, endingTime){
 }
 
 async function main(){
-  var list = document.getElementById("routeacc")
   routeData = await getRoutes();
   tripData = await getTrips();
   stopTimeData = await getStopTimes();
