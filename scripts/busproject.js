@@ -88,6 +88,32 @@ async function main(){
   const tripRows = tripData.toString().trim().split('\n')
   const stopTimeRows = stopTimeData.toString().trim().split('\n')
   const busStopRows = busStopData.toString().trim().split('\n')
+
+  let targetDate = "";
+  let largestTime = 0;
+
+
+  let firstIndex = 0;
+
+  // Determining what the newest service date is
+  for (const t of tripRows) {
+    firstIndex++
+    const [block_id, routeNumber , wheelChairAccessible, directionID, routeLetterDestination, shape_id, serviceIDDay, tripID, directionName] = t.split(',')
+
+    // Running for around 150 lines should be more than enough to determine the newest service date
+    if(firstIndex > 150){
+      break;
+    }
+
+    // 2022-01 or 2022-03 for example
+    let smallString = block_id.substring(block_id.length-7, block_id.length);
+    const sepTime = smallString.trim().split("-");
+    let thisTime = ( (parseInt(sepTime[0])*14) + (parseInt(sepTime[1])) );
+    if(thisTime > largestTime){
+      largestTime = thisTime;
+      targetDate = smallString;
+    }
+  }
   
 
     let index = 0
@@ -166,6 +192,7 @@ async function main(){
         for (const t of tripRows) {
           tripIndex++
           const [block_id, routeNumber , wheelChairAccessible, directionID, routeLetterDestination, shape_id, serviceIDDay, tripID, directionName] = t.split(',')
+          if(block_id.includes(targetDate)){
 
           tripName = directionName.replace(/\s/g,'') + " Route " + routeNumber.replace(/\s/g,'') + " " + routeLetterDestination.replace(/\s/g,'') + " " + shape_id.toString().substring(0, shape_id.toString().indexOf('_Tim'));
 
@@ -373,7 +400,8 @@ async function main(){
 
             }
           }
-        }
+        } // End bracket for target date search
+        } // End bracket for trips loop
         if(foundVariations.length == 0){
           var badge = document.createElement("span");
           badge.classList.add("badge", "bg-danger");
@@ -410,7 +438,7 @@ async function main(){
 
     for (const sto of stopTimeRows) {
       const [sTripID, sArrivalTime , sDepartTime, sStopID, sStopSequence, sStopHeadsign, sPickupType, sDropOff, sShapeDistTravel, sTimePoint] = sto.split(',');
-      if(tripsMade.has(sTripID)){
+      if(tripsMade.has(sTripID) && sTripID.includes(targetDate)){
         // Subroute name [0], day [1], routeNumber[2]
         let foundData = tripsMade.get(sTripID);
         let theDate = foundData[1].replace(/\d+/g, '');
@@ -464,7 +492,7 @@ async function main(){
 
 
 
-    document.getElementById("loadingnotice").remove();
+    document.getElementById("loadingnotice").innerHTML = "The following is using service times effective from: " + targetDate
     document.getElementById("loadingspinner").remove();
 
 
