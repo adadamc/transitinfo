@@ -84,6 +84,10 @@
             <th><span class="badge bg-warning text-dark">PULSE</span></th>
             <th>Bus Rapid Transit</th>
         </tr>
+        <tr>
+          <th><span class="badge bg-light text-dark">600</span></th>
+          <th>Stop also serves route #</th>
+      </tr>
       </table>
       
       <br>
@@ -91,7 +95,7 @@
 
       <h3>Routes</h3>
 
-      <h5 id="loadingnotice">Please allow around 5-15 seconds for data to load.</h5>
+      <h5 id="loadingnotice">Please allow around 10-20 seconds for data to load.</h5>
 
       <div class="d-flex justify-content-center" id="loadingspinner">
         <div class="spinner-border" role="status">
@@ -110,14 +114,30 @@
 
       <div class="accordion" id="accordionExampleBus" id="accr">
 
+        <div class="accordion-item" id="accr">
+          <h2 class="accordion-header" id="headingThree">
+            <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#collapseThree" aria-expanded="true" aria-controls="collapseThree" id="acr3">
+              March 16, 2022 (V 1.2)
+            </button>
+          </h2>
+          <div id="collapseThree" class="accordion-collapse collapse" aria-labelledby="headingThree" data-bs-parent="#accordionExampleBus">
+            <div class="accordion-body">
+              <ul>
+                <li>Now shows the days and times each sub-route runs</li>
+                <li>Stops now show all other routes served by that stop
+                </li>
+            </ul>
+            </div>
+          </div>
+        </div>
 
         <div class="accordion-item" id="accr">
-          <h2 class="accordion-header" id="headingOne">
-            <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#collapseOne" aria-expanded="true" aria-controls="collapseOne" id="acr2">
+          <h2 class="accordion-header" id="headingTwo">
+            <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#collapseTwo" aria-expanded="true" aria-controls="collapseTwo" id="acr2">
               March 14, 2022 (V 1.1)
             </button>
           </h2>
-          <div id="collapseOne" class="accordion-collapse collapse" aria-labelledby="headingOne" data-bs-parent="#accordionExampleBus">
+          <div id="collapseTwo" class="accordion-collapse collapse" aria-labelledby="headingTwo" data-bs-parent="#accordionExampleBus">
             <div class="accordion-body">
               <ul>
                 <li>See the March 13, 2022 (V 1.0) update log for extra details, the following describes updates since that version</li>
@@ -131,12 +151,12 @@
         </div>
 
         <div class="accordion-item" id="accr">
-          <h2 class="accordion-header" id="headingTwo">
-            <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#collapseTwo" aria-expanded="true" aria-controls="collapseTwo" id="acr3">
+          <h2 class="accordion-header" id="headingOne">
+            <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#collapseOne" aria-expanded="true" aria-controls="collapseOne" id="acr1">
               March 13, 2022 (V 1.0)
             </button>
           </h2>
-          <div id="collapseTwo" class="accordion-collapse collapse" aria-labelledby="headingTwo" data-bs-parent="#accordionExampleBus">
+          <div id="collapseOne" class="accordion-collapse collapse" aria-labelledby="headingOne" data-bs-parent="#accordionExampleBus">
             <div class="accordion-body">
               <ul>
                 <li>Currently all code is client sided using JavaScript.</li>

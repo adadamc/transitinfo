@@ -111,13 +111,7 @@ h2{
     font-size: 13px;
 }
 
-
-#acr2{
-    background-color: #353535;
-    color: white;
-}
-
-#acr3{
+[id^=acr]{
     background-color: #353535;
     color: white;
 }
