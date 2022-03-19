@@ -9,43 +9,43 @@ const tripsMade = new Map(); // [Subroute Name (0), Day (1)]
 const tripDays = new Map();
 const alsoServes = new Map();
 
+// Fetches the routes.txt data file, some of the data contained here is the route name, route number and route color
 async function getRoutes(){
   let response = await fetch('../data/BusProject/routes.txt');
   let dataText = await response.text();
   return dataText;
 }
 
+// Fetches the trips.txt data file, some of the data contained here is the day of week the trip runs and sub-route name
 async function getTrips(){
   let response = await fetch('../data/BusProject/trips.txt');
   let dataText = await response.text();
   return dataText;
 }
 
+// Fetches the stop_times.txt data file, some of the data contained here is the time a bus on a certain trip leaves each stop
 async function getStopTimes(){
   let response = await fetch('../data/BusProject/stop_times.txt');
   let dataText = await response.text();
   return dataText;
 }
 
+// Fetches the stops.txt data file, some of the data contained here is the stop name and stop id
 async function getStops(){
   let response = await fetch('../data/BusProject/stops.txt');
   let dataText = await response.text();
   return dataText;
 }
 
+// Given a time and array, add the time to an array and sort
 function sortTimes(currentArr, newTime){
-
-  let workWithTime = newTime;
-  workWithTime = workWithTime.trim().split(":");
-
-  const newArray = currentArr.slice();
-  if(!newArray.includes(newTime)){
-    newArray.push(newTime);
-    newArray.sort();
-  }
+  const newArray = currentArr.slice(); // Duplicate the array
+  newArray.push(newTime);
+  newArray.sort();
   return newArray;
 }
 
+// Find the time elapsed between a starting time and end time in a string format (HH:MM:SS)
 function getTimeElapsed(startingTime, endingTime){
   const stTime = startingTime.trim().split(":");
   const enTime = endingTime.trim().split(":");
@@ -84,6 +84,7 @@ async function main(){
   stopTimeData = await getStopTimes();
   busStopData = await getStops();
 
+  // Split by new line (each is a new entry)
   const rows = routeData.toString().trim().split('\n')
   const tripRows = tripData.toString().trim().split('\n')
   const stopTimeRows = stopTimeData.toString().trim().split('\n')
@@ -105,10 +106,10 @@ async function main(){
       break;
     }
 
-    // 2022-01 or 2022-03 for example
+    // 2022-01 or 2022-03 for example, sometimes outdated trips are left in the document (I assume near service changes), so we should only consider the newest ones
     let smallString = block_id.substring(block_id.length-7, block_id.length);
     const sepTime = smallString.trim().split("-");
-    let thisTime = ( (parseInt(sepTime[0])*14) + (parseInt(sepTime[1])) );
+    let thisTime = ( (parseInt(sepTime[0])*14) + (parseInt(sepTime[1])) ); // Give priority to the year, I could of used *12, but the year will always be more important so any number above 12 works
     if(thisTime > largestTime){
       largestTime = thisTime;
       targetDate = smallString;
@@ -117,11 +118,13 @@ async function main(){
   
 
     let index = 0
+    // Loop through the route data
     for (const r of rows) {
       index++
-      const [routeName, routeType , routeTextColor, routeColor, agency, route_id, route_url, route_desc, route_short_name] = r.split(',')
+      const [routeName, routeType , routeTextColor, routeColor, agency, route_id, route_url, route_desc, route_short_name] = r.split(',') // Data is seperated by commas
       if(index != 1){
       
+        // Make an accordion-item (and children) for each route
         var aRoute = document.createElement("div");
         aRoute.classList.add("accordion-item");
         aRoute.id = "accrRoute" + index.toString();
@@ -147,7 +150,7 @@ async function main(){
         acButton.setAttribute("data-bs-target", "#flush-collapse" + index.toString());
         acButton.setAttribute("aria-expanded", "false");
         acButton.setAttribute("aria-controls", "flush-collapse" + index.toString());
-        acButton.innerHTML = "Route " + route_short_name + " - " + routeName;
+        acButton.innerHTML = "Route " + route_short_name + " - " + routeName; // TEXT: Display route number and name to user
         acButton.id = "acButtonRoute" + index.toString();
 
         heading.appendChild(acButton);
@@ -194,8 +197,10 @@ async function main(){
           const [block_id, routeNumber , wheelChairAccessible, directionID, routeLetterDestination, shape_id, serviceIDDay, tripID, directionName] = t.split(',')
           if(block_id.includes(targetDate)){
 
+          // The trip name will be the direction, route number and sub-route variation. shape_id is used to account for subroutes where all other information is identical but the stops are different.
           tripName = directionName.replace(/\s/g,'') + " Route " + routeNumber.replace(/\s/g,'') + " " + routeLetterDestination.replace(/\s/g,'') + " " + shape_id.toString().substring(0, shape_id.toString().indexOf('_Tim'));
 
+          // Add a new trip to our map only if it was not found yet
           if(!tripsMade.has(tripID)){
             tripsMade.set(tripID, [tripName, serviceIDDay, routeNumber])
           }
@@ -203,19 +208,23 @@ async function main(){
           if(parseInt(routeNumber.replace(/\D/g,'')) == parseInt(route_short_name.replace(/\D/g,''))){
 
 
-
+            // Check if service runs on weekdays
             if((serviceIDDay.replace(/\d+/g, '') == "Saturday Plus_merged_") && weekdaysFound == false){
               weekdaysFound = true;
             }
 
-            if((serviceIDDay.replace(/\d+/g, '') == "Sunday Minus_merged_") && weekendsFound == false){
+            // Check if service runs on Sunday (Minus) or Saturday (Plus) or 7 days a week (Overnight)
+            if((serviceIDDay.replace(/\d+/g, '') == "Sunday Minus_merged_" || serviceIDDay.replace(/\d+/g, '') == "Sunday Plus_merged_" || serviceIDDay.replace(/\d+/g, '') == "Overnight All Days_") && weekendsFound == false){
               weekendsFound = true;
             }
 
+            // Do not duplicate any route variations found
             if(!foundVariations.includes(tripName)){
 
               foundVariations.push(tripName);
 
+
+              // Make an accordion-item for each sub-route
               var bRoute = document.createElement("div");
               bRoute.classList.add("accordion-item");
               bRoute.id = "accrRoute-inner" + index.toString() + tripIndex.toString();
@@ -241,7 +250,6 @@ async function main(){
               bcButton.setAttribute("data-bs-target", "#flush-collapse-inner" + index.toString() + tripIndex.toString());
               bcButton.setAttribute("aria-expanded", "false");
               bcButton.setAttribute("aria-controls", "flush-collapse-inner" + index.toString() + tripIndex.toString());
-              //bcButton.innerHTML = directionName + " Route " + routeNumber + " " + routeLetterDestination;
               bcButton.id = "bcButtonRoute" + index.toString() + tripIndex.toString();
 
               var table = document.createElement("table");
@@ -251,13 +259,13 @@ async function main(){
               table.appendChild(firstRow);
 
               var headline = document.createElement("td");
-              headline.innerHTML = directionName + " Route " + routeNumber + " " + routeLetterDestination;
+              headline.innerHTML = directionName + " Route " + routeNumber + " " + routeLetterDestination; // TEXT: Contains the direction, route number and sub-route details
               firstRow.appendChild(headline);
 
               var secondRow = document.createElement("tr");
               table.appendChild(secondRow);
 
-              var firstStop = document.createElement("td");
+              var firstStop = document.createElement("td"); // Some sub-routes end at the same place but start at different points, so show the first stop to make it less confusing
               firstStop.innerHTML = "First Stop: Not Found";
               firstStop.id = "FirstStop" + index.toString() + tripIndex.toString();
               secondRow.appendChild(firstStop);
@@ -277,112 +285,120 @@ async function main(){
               let starterTime = "";
               let firstStopID = 0;
 
+              // Loop through all the stop times
               for (const sto of stopTimeRows) {
                 stopIndex++;
                 const [sTripID, sArrivalTime , sDepartTime, sStopID, sStopSequence, sStopHeadsign, sPickupType, sDropOff, sShapeDistTravel, sTimePoint] = sto.split(',');
 
-              if(tripID == sTripID){
-                if(equalTripIDs == false){
-                  starterTime = sDepartTime;
-                  firstStopID = sStopID;
-                }
-                equalTripIDs = true;
+                // Check if the trip ID of the stop time matches the trip we are looking at
+                if(tripID == sTripID){
+                  if(equalTripIDs == false){
+                    starterTime = sDepartTime;
+                    firstStopID = sStopID;
+                  }
+                  equalTripIDs = true;
 
-                var stopGroup = document.createElement("li");
-                stopGroup.classList.add("list-group-item", "d-flex", "justify-content-between", "align-items-start");
-                stopGroup.id = "stopGroup_" + index.toString() + tripIndex.toString() + stopIndex.toString();
+                  var stopGroup = document.createElement("li");
+                  stopGroup.classList.add("list-group-item", "d-flex", "justify-content-between", "align-items-start");
+                  stopGroup.id = "stopGroup_" + index.toString() + tripIndex.toString() + stopIndex.toString();
                 
-                var stopShift = document.createElement("div");
-                stopShift.classList.add("ms-2",  "me-auto");
-                stopGroup.appendChild(stopShift);
+                  var stopShift = document.createElement("div");
+                  stopShift.classList.add("ms-2",  "me-auto");
+                  stopGroup.appendChild(stopShift);
 
-                var stopHeading = document.createElement("div");
-                stopHeading.textContent = "Stop Name Not Found!";
-                stopHeading.id = index.toString() + tripIndex.toString() + stopIndex.toString();
-                stopShift.appendChild(stopHeading);
+                  var stopHeading = document.createElement("div");
+                  stopHeading.textContent = "Stop Name Not Found!"; // Default text
+                  stopHeading.id = index.toString() + tripIndex.toString() + stopIndex.toString();
+                  stopShift.appendChild(stopHeading);
 
+                  // Loop through the bus stop file
+                  for (const bst of busStopRows) {
+                    const [b_lat, b_wheelchair , b_stopCode, b_stop_lon, b_stop_timezone, b_stop_url, b_parent_station, b_stop_desc, b_stop_name, b_locationtype, b_stopID, b_zoneID] = bst.split(',')
+                    if(sStopID == b_stopID){
+                      stopHeading.innerHTML = b_stop_name; // Update the bus stop name
 
-                for (const bst of busStopRows) {
-                  const [b_lat, b_wheelchair , b_stopCode, b_stop_lon, b_stop_timezone, b_stop_url, b_parent_station, b_stop_desc, b_stop_name, b_locationtype, b_stopID, b_zoneID] = bst.split(',')
-                  if(sStopID == b_stopID){
-                    stopHeading.innerHTML = b_stop_name;
+                      if(b_stopID == firstStopID){
+                        firstStop.innerHTML = "Origin stop: " + b_stop_name; // Update text showing first stop on a sub-route
+                      }
 
-                    if(b_stopID == firstStopID){
-                      firstStop.innerHTML = "Origin stop: " + b_stop_name;
-                    }
-
-                    if(b_wheelchair == 1){
+                      // Check if a bus stop is wheelchair accessible
+                      if(b_wheelchair == 1){
                         var badge = document.createElement("span");
                         badge.classList.add("badge", "bg-success");
                         badge.innerHTML = "Accessible";
                         badge.id = "Badge_AC_" + index.toString() + tripIndex.toString() + stopIndex.toString();
                         stopHeading.appendChild(badge);
-                    }
-
-                    // Badge used if this stop has other routes using it
-                    var badgeConnect = document.createElement("span");
-                        badgeConnect.classList.add("badge", "bg-light", "text-dark");
-                        badgeConnect.innerHTML = "";
-                        badgeConnect.id = "Badge_CO_" + tripName + sStopID;
-                        stopHeading.appendChild(badgeConnect);
-
-
-                    let routesArray = []
-                    routesArray = alsoServes.get(b_stopID);
-                    if(routesArray){
-                      if(!routesArray.includes(route_short_name)){
-                        routesArray.push(route_short_name);
-                        alsoServes.set(b_stopID, routesArray);
                       }
-                    }else{
-                      alsoServes.set(b_stopID, [route_short_name]);
+
+                      // Badge used if this stop has other routes using it
+                      var badgeConnect = document.createElement("span");
+                      badgeConnect.classList.add("badge", "bg-light", "text-dark");
+                      badgeConnect.innerHTML = "";
+                      badgeConnect.id = "Badge_CO_" + tripName + sStopID;
+                      stopHeading.appendChild(badgeConnect);
+
+                      // Keep track of the routes this bus stop servers
+                      let routesArray = []
+                      routesArray = alsoServes.get(b_stopID);
+                      if(routesArray){
+                        if(!routesArray.includes(route_short_name)){
+                          routesArray.push(route_short_name);
+                          alsoServes.set(b_stopID, routesArray);
+                        }
+                      }else{
+                        alsoServes.set(b_stopID, [route_short_name]);
+                      }
+
+                      break;
                     }
-
-                    break;
                   }
-                }
 
 
+                  // Show the time elapsed between a stop and the origin
+                  var subTextElapsed = document.createElement("li"); // Time Elapsed Text Section
+                  subTextElapsed.innerHTML = "<b>Time Elapsed:</b> " + getTimeElapsed(starterTime, sDepartTime);
+                  subTextElapsed.id = "subText" + sStopID + "-" + routeNumber + "-" + routeLetterDestination + "TimeElapsed";
+                  stopHeading.appendChild(subTextElapsed);
 
-                var subTextElapsed = document.createElement("li"); // Time Elapsed Text Section
-                subTextElapsed.innerHTML = "<b>Time Elapsed:</b> " + getTimeElapsed(starterTime, sDepartTime);
-                subTextElapsed.id = "subText" + sStopID + "-" + routeNumber + "-" + routeLetterDestination + "TimeElapsed";
-                stopHeading.appendChild(subTextElapsed);
+                  // Show the stop times during all days (overnight)
+                  var subTextAllDays = document.createElement("li");
+                  subTextAllDays.innerHTML = "This stop is served more than once, all times are listed on the first occurance";
+                  subTextAllDays.id = "subText" + tripName + sStopID + "Overnight All Days_merged_";
+                  tripDays.set("subText" + tripName + sStopID + "Overnight All Days_merged_", [])
+                  stopHeading.appendChild(subTextAllDays);
 
-                var subTextAllDays = document.createElement("li"); // Time Elapsed Text Section
-                subTextAllDays.innerHTML = "This stop is served more than once, all times are listed on the first occurance";
-                subTextAllDays.id = "subText" + tripName + sStopID + "Overnight All Days_merged_";
-                tripDays.set("subText" + tripName + sStopID + "Overnight All Days_merged_", [])
-                stopHeading.appendChild(subTextAllDays);
+                  // Show weekday stop times
+                  var subTextWeekdays = document.createElement("li");
+                  subTextWeekdays.innerHTML = "";
+                  subTextWeekdays.id = "subText" + tripName.toString() + sStopID.toString() + "Saturday Plus_merged_";
+                  tripDays.set("subText" + tripName.toString() + sStopID.toString() + "Saturday Plus_merged_", [])
+                  stopHeading.appendChild(subTextWeekdays);
 
-                var subTextWeekdays = document.createElement("li"); // Time Elapsed Text Section
-                subTextWeekdays.innerHTML = "";
-                subTextWeekdays.id = "subText" + tripName.toString() + sStopID.toString() + "Saturday Plus_merged_";
-                tripDays.set("subText" + tripName.toString() + sStopID.toString() + "Saturday Plus_merged_", [])
-                stopHeading.appendChild(subTextWeekdays);
+                  // Show weekday (post-secondary school year) stop times
+                  var subTextPostSecondary = document.createElement("li");
+                  subTextPostSecondary.innerHTML = "";
+                  subTextPostSecondary.id = "subText" + tripName + sStopID + "Post-Secondary_merged_";
+                  tripDays.set("subText" + tripName + sStopID + "Post-Secondary_merged_", [])
+                  stopHeading.appendChild(subTextPostSecondary);
 
-                var subTextPostSecondary = document.createElement("li"); // Time Elapsed Text Section
-                subTextPostSecondary.innerHTML = "";
-                subTextPostSecondary.id = "subText" + tripName + sStopID + "Post-Secondary_merged_";
-                tripDays.set("subText" + tripName + sStopID + "Post-Secondary_merged_", [])
-                stopHeading.appendChild(subTextPostSecondary);
+                  // Show Saturday stop times
+                  var subTextSaturday = document.createElement("li");
+                  subTextSaturday.innerHTML = "";
+                  subTextSaturday.id = "subText" + tripName + sStopID + "Sunday Plus_merged_";
+                  tripDays.set("subText" + tripName + sStopID + "Sunday Plus_merged_", [])
+                  stopHeading.appendChild(subTextSaturday);
 
-                var subTextSaturday = document.createElement("li"); // Time Elapsed Text Section
-                subTextSaturday.innerHTML = "";
-                subTextSaturday.id = "subText" + tripName + sStopID + "Sunday Plus_merged_";
-                tripDays.set("subText" + tripName + sStopID + "Sunday Plus_merged_", [])
-                stopHeading.appendChild(subTextSaturday);
+                  // Show sunday stop times
+                  var subTextSunday = document.createElement("li");
+                  subTextSunday.innerHTML = "";
+                  subTextSunday.id = "subText" + tripName + sStopID + "Sunday Minus_merged_";
+                  tripDays.set("subText" + tripName + sStopID + "Sunday Minus_merged_", [])
+                  stopHeading.appendChild(subTextSunday);
 
-                var subTextSunday = document.createElement("li"); // Time Elapsed Text Section
-                subTextSunday.innerHTML = "";
-                subTextSunday.id = "subText" + tripName + sStopID + "Sunday Minus_merged_";
-                tripDays.set("subText" + tripName + sStopID + "Sunday Minus_merged_", [])
-                stopHeading.appendChild(subTextSunday);
-
-                theList.appendChild(stopGroup);
+                  theList.appendChild(stopGroup);
 
               }else if(equalTripIDs == true){
-                break;
+                break; // Break to avoid un-needed looping
               }            
 
 
@@ -402,6 +418,8 @@ async function main(){
           }
         } // End bracket for target date search
         } // End bracket for trips loop
+
+        // If a route has no sub-routes, that means it is not currently running
         if(foundVariations.length == 0){
           var badge = document.createElement("span");
           badge.classList.add("badge", "bg-danger");
@@ -410,7 +428,8 @@ async function main(){
           acButton.appendChild(badge)
         }
 
-        if((!weekdaysFound) && foundVariations.length != 0){ // In the event a bus does not run on weekdays, we will give a warning message
+        // In the event a bus does not run on weekdays, we will give a warning message
+        if((!weekdaysFound) && foundVariations.length != 0){
           var badge = document.createElement("span");
           badge.classList.add("badge", "bg-success");
           badge.innerHTML = "NO Weekday Service";
@@ -418,6 +437,7 @@ async function main(){
           acButton.appendChild(badge);
         }
 
+        // Display when a route runs on weekends
         if(weekendsFound){
         var badge = document.createElement("span");
         badge.classList.add("badge", "bg-secondary");
@@ -436,6 +456,7 @@ async function main(){
     }
 
 
+    // Loop through stop times
     for (const sto of stopTimeRows) {
       const [sTripID, sArrivalTime , sDepartTime, sStopID, sStopSequence, sStopHeadsign, sPickupType, sDropOff, sShapeDistTravel, sTimePoint] = sto.split(',');
       if(tripsMade.has(sTripID) && sTripID.includes(targetDate)){
@@ -460,12 +481,14 @@ async function main(){
                 }
               }
 
+              // Show routes that share this stop
               if(arrayOfSharedStops.length > 0){
                 document.getElementById("Badge_CO_" + foundData[0] + sStopID).innerHTML = arrayOfSharedStops.join(" / ");
               }
 
             }
 
+            // Insert stop times into the interface
             if(elementFound.innerHTML.search(sDepartTime) == -1){
               if(theDate == "Post-Secondary_merged_"){
                 elementFound.innerHTML = "<b>Weekdays (Post Secondary School Year):</b> " + returnedArray.join(", ");
@@ -492,8 +515,8 @@ async function main(){
 
 
 
-    document.getElementById("loadingnotice").innerHTML = "The following is using service times effective from: " + targetDate
-    document.getElementById("loadingspinner").remove();
+    document.getElementById("loadingnotice").innerHTML = "The following is using service times effective from: " + targetDate // Effective date for trips shown
+    document.getElementById("loadingspinner").remove(); // Loading is done, remove the spinner
 
 
 }
