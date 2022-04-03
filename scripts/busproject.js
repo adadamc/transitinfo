@@ -5,6 +5,8 @@ let tripData = ""
 let stopTimeData = ""
 let busStopData = ""
 
+let AvoidDuplicateTrips = true; // This should typically be set to true (but in the event the data files ever change to not include duplicate trips this can be set to false)
+
 const tripsMade = new Map(); // [Subroute Name (0), Day (1)]
 const tripDays = new Map();
 const alsoServes = new Map();
@@ -85,10 +87,31 @@ async function main(){
   busStopData = await getStops();
 
   // Split by new line (each is a new entry)
-  const rows = routeData.toString().trim().split('\n')
+  const rowsUnsorted = routeData.toString().trim().split('\n')
+  const rows = []
   const tripRows = tripData.toString().trim().split('\n')
   const stopTimeRows = stopTimeData.toString().trim().split('\n')
   const busStopRows = busStopData.toString().trim().split('\n')
+
+  var placeHolder;
+  let lowestFound = Infinity
+  let toRemove = 0;
+  let originalLength = rowsUnsorted.length;
+  
+  
+  for(let i = 1; i<originalLength; i++){
+    lowestFound = Infinity
+    toRemove = 0;
+    for(let x = 1; x<rowsUnsorted.length; x++){
+      const [routeName2, routeType2 , routeTextColor2, routeColor2, agency2, route_id2, route_url2, route_desc2, route_short_name2] = rowsUnsorted[x].split(',') // Data is seperated by commas
+      if(lowestFound > parseInt(route_short_name2.replace(/\D/g,''))){
+        lowestFound = parseInt(route_short_name2.match(/([0-9])+/,""));
+        toRemove = x;
+      }
+    }
+    placeHolder = rowsUnsorted.splice(toRemove, 1);
+    rows.push(placeHolder[0]);
+  }
 
   let targetDate = "";
   let largestTime = 0;
@@ -97,12 +120,13 @@ async function main(){
   let firstIndex = 0;
 
   // Determining what the newest service date is
+if(AvoidDuplicateTrips == true){
   for (const t of tripRows) {
     firstIndex++
     const [block_id, routeNumber , wheelChairAccessible, directionID, routeLetterDestination, shape_id, serviceIDDay, tripID, directionName] = t.split(',')
 
-    // Running for around 150 lines should be more than enough to determine the newest service date
-    if(firstIndex > 150){
+    // Running for around 2000 lines should be more than enough to determine the newest service date
+    if(firstIndex > 2000){
       break;
     }
 
@@ -115,6 +139,7 @@ async function main(){
       targetDate = smallString;
     }
   }
+}
   
 
     let index = 0
@@ -122,7 +147,7 @@ async function main(){
     for (const r of rows) {
       index++
       const [routeName, routeType , routeTextColor, routeColor, agency, route_id, route_url, route_desc, route_short_name] = r.split(',') // Data is seperated by commas
-      if(index != 1){
+
       
         // Make an accordion-item (and children) for each route
         var aRoute = document.createElement("div");
@@ -195,7 +220,7 @@ async function main(){
         for (const t of tripRows) {
           tripIndex++
           const [block_id, routeNumber , wheelChairAccessible, directionID, routeLetterDestination, shape_id, serviceIDDay, tripID, directionName] = t.split(',')
-          if(block_id.includes(targetDate)){
+          if(block_id.includes(targetDate) || AvoidDuplicateTrips == false){
 
           // The trip name will be the direction, route number and sub-route variation. shape_id is used to account for subroutes where all other information is identical but the stops are different.
           tripName = directionName.replace(/\s/g,'') + " Route " + routeNumber.replace(/\s/g,'') + " " + routeLetterDestination.replace(/\s/g,'') + " " + shape_id.toString().substring(0, shape_id.toString().indexOf('_Tim'));
@@ -209,12 +234,12 @@ async function main(){
 
 
             // Check if service runs on weekdays
-            if((serviceIDDay.replace(/\d+/g, '') == "Saturday Plus_merged_") && weekdaysFound == false){
+            if((serviceIDDay.replace(/\d+/g, '') == "Saturday Plus_merged_" || serviceIDDay.replace(/\d+/g, '') == "Weekday") && weekdaysFound == false){
               weekdaysFound = true;
             }
 
             // Check if service runs on Sunday (Minus) or Saturday (Plus) or 7 days a week (Overnight)
-            if((serviceIDDay.replace(/\d+/g, '') == "Sunday Minus_merged_" || serviceIDDay.replace(/\d+/g, '') == "Sunday Plus_merged_" || serviceIDDay.replace(/\d+/g, '') == "Overnight All Days_") && weekendsFound == false){
+            if((serviceIDDay.replace(/\d+/g, '') == "Sunday Minus_merged_" || serviceIDDay.replace(/\d+/g, '') == "Sunday Plus_merged_" || serviceIDDay.replace(/\d+/g, '') == "Overnight All Days_merged_" || serviceIDDay.replace(/\d+/g, '') == "Saturday" || serviceIDDay.replace(/\d+/g, '') == "Sunday") && weekendsFound == false){
               weekendsFound = true;
             }
 
@@ -374,6 +399,13 @@ async function main(){
                   tripDays.set("subText" + tripName.toString() + sStopID.toString() + "Saturday Plus_merged_", [])
                   stopHeading.appendChild(subTextWeekdays);
 
+                  // Show weekday stop times (new format)
+                  var subTextWeekdays = document.createElement("li");
+                  subTextWeekdays.innerHTML = "";
+                  subTextWeekdays.id = "subText" + tripName.toString() + sStopID.toString() + "Weekday";
+                  tripDays.set("subText" + tripName.toString() + sStopID.toString() + "Weekday", [])
+                  stopHeading.appendChild(subTextWeekdays);
+
                   // Show weekday (post-secondary school year) stop times
                   var subTextPostSecondary = document.createElement("li");
                   subTextPostSecondary.innerHTML = "";
@@ -388,11 +420,25 @@ async function main(){
                   tripDays.set("subText" + tripName + sStopID + "Sunday Plus_merged_", [])
                   stopHeading.appendChild(subTextSaturday);
 
+                  // Show Saturday stop times (new format)
+                  var subTextSaturday = document.createElement("li");
+                  subTextSaturday.innerHTML = "";
+                  subTextSaturday.id = "subText" + tripName + sStopID + "Saturday";
+                  tripDays.set("subText" + tripName + sStopID + "Saturday", [])
+                  stopHeading.appendChild(subTextSaturday);
+
                   // Show sunday stop times
                   var subTextSunday = document.createElement("li");
                   subTextSunday.innerHTML = "";
                   subTextSunday.id = "subText" + tripName + sStopID + "Sunday Minus_merged_";
                   tripDays.set("subText" + tripName + sStopID + "Sunday Minus_merged_", [])
+                  stopHeading.appendChild(subTextSunday);
+
+                  // Show sunday stop times (new format)
+                  var subTextSunday = document.createElement("li");
+                  subTextSunday.innerHTML = "";
+                  subTextSunday.id = "subText" + tripName + sStopID + "Sunday";
+                  tripDays.set("subText" + tripName + sStopID + "Sunday", [])
                   stopHeading.appendChild(subTextSunday);
 
                   theList.appendChild(stopGroup);
@@ -452,14 +498,14 @@ async function main(){
         list.appendChild(aRoute);
         
       
-      }
+      
     }
 
 
     // Loop through stop times
     for (const sto of stopTimeRows) {
       const [sTripID, sArrivalTime , sDepartTime, sStopID, sStopSequence, sStopHeadsign, sPickupType, sDropOff, sShapeDistTravel, sTimePoint] = sto.split(',');
-      if(tripsMade.has(sTripID) && sTripID.includes(targetDate)){
+      if(tripsMade.has(sTripID) && (sTripID.includes(targetDate) || AvoidDuplicateTrips == false)){
         // Subroute name [0], day [1], routeNumber[2]
         let foundData = tripsMade.get(sTripID);
         let theDate = foundData[1].replace(/\d+/g, '');
@@ -499,6 +545,12 @@ async function main(){
               }else if(theDate == "Overnight All Days_merged_"){
                 elementFound.innerHTML = "<b>All days:</b> " + returnedArray.join(", ");
               }else if(theDate == "Saturday Plus_merged_"){
+                elementFound.innerHTML = "<b>Weekdays:</b> " + returnedArray.join(", ");
+              }else if(theDate == "Saturday"){
+                elementFound.innerHTML = "<b>Saturday:</b> " + returnedArray.join(", ");
+              }else if(theDate == "Sunday"){
+                elementFound.innerHTML = "<b>Sunday:</b> " + returnedArray.join(", ");
+              }else if(theDate == "Weekday"){
                 elementFound.innerHTML = "<b>Weekdays:</b> " + returnedArray.join(", ");
               }
             }
